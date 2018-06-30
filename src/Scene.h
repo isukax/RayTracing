@@ -21,14 +21,11 @@ std::vector<Hitable*> scene
 	new Sphere(Vector3(50.0, 90.0, 81.6),		15.0,	Material(Material::ReflectionType::REFLECTION_TYPE_DIFFUSE, Color(), Color(36,36,36))), //è∆ñæ
 };
 
-
-
-bool IntersectScene(Ray& ray, std::vector<Hitable*>& scene, HitPoint& hitpoint)
+inline bool IntersectScene(Ray& ray, std::vector<Hitable*>& scene, HitPoint& hitpoint)
 {
-	HitPoint h;
-	
 	for (auto& obj : scene)
 	{
+		HitPoint h;
 		if (!obj->intersect(ray, h))
 		{
 			continue;

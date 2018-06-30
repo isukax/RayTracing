@@ -13,7 +13,7 @@ public:
 	{
 		Vector3 upDir = Vector3(0, 1, 0);
 		rightDirection = Normalize(Cross(upDir, direction));
-		upDirection = Cross(rightDirection, direction);
+		upDirection = Cross(direction, rightDirection);
 	}
 
 	//void SetFocalLength(double fl) { focalLength = fl; }

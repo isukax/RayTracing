@@ -5,12 +5,13 @@
 #include "Material.h"
 #include "Constant.h"
 #include "Type.h"
+#include "Hitable.h"
 
 class Sphere : public Hitable
 {
 public:
 	Sphere() = delete;
-	Sphere(const Vector3 pos, const double radius, const Material material)
+	Sphere(const Vector3 pos, const double radius, Material* material)
 		: Hitable(material)
 		, position(pos)
 		, radius(radius)

@@ -6,6 +6,8 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "Random.h"
+#include "Material.h"
+#include "Type.h"
 #include <algorithm>
 
 // namespace
@@ -18,9 +20,10 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 		return Color();
 	}
 	const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // 交差位置の法線（物体からのレイの入出を考慮）
-	const Hitable* now_object = objectList[hitpoint.objectId];
-
-	double russianRouletteProb = std::max(now_object->material.color.x, std::max(now_object->material.color.y, now_object->material.color.z));
+	Hitable* now_object = objectList[hitpoint.objectId];
+	// 色の反射率最大のものを得る。ロシアンルーレットで使う。
+	// ロシアンルーレットの閾値は任意だが色の反射率等を使うとより良い。
+	double russianRouletteProb = std::max(now_object->material->albedo.x, std::max(now_object->material->albedo.y, now_object->material->albedo.z));
 
 	// 反射回数が一定以上になったらロシアンルーレットの確率を急上昇させる。（スタックオーバーフロー対策）
 	if (depth > kDepthLimit)
@@ -34,7 +37,7 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 	{
 		if (rand.Next() >= russianRouletteProb)
 		{
-			return now_object->material.emission;
+			return now_object->material->emission;
 			//float t = 0.5 * (-ray.direction.y + 1.0);
 			//return Color(1.0, 1.0, 1.0) * (1.0 - t) + Color(0.5, 0.7, 1.0) * t;
 		}
@@ -44,29 +47,11 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 		russianRouletteProb = 1.0;
 	}
 
-	// orienting_normalの方向を基準とした正規直交基底(w, u, v)を作る。この基底に対する半球内で次のレイを飛ばす。
-	Vector3 w, u, v;
-	w = normal;
-	if (fabs(w.x) > kEPS)
-	{
-		u = Normalize(Cross(Vector3(0.0, 1.0, 0.0), w));
-	}
-	else
-	{
-		u = Normalize(Cross(Vector3(1.0, 0.0, 0.0), w));
-	}
-	v = Cross(w, u);
-
-	double phi = 2.0 * PI * rand.Next();
-	double r2 = rand.Next(), theta = sqrt(r2);
-	Vector3 dir = Normalize(
-		u * cos(phi) * theta + 
-		v * sin(phi) * theta +
-		w * sqrt(1.0 - r2)
-	);
-
+	Vector3 dir;
+	Color albedo;
+	now_object->material->GetRadiance(ray, hitpoint, rand, dir, albedo);
 	Color incomingRadiance = color(Ray(hitpoint.position, dir), objectList, rand, depth + 1) ;
-	Color weight = now_object->material.color / russianRouletteProb;
+	Color weight = now_object->material->albedo / russianRouletteProb;
 
 	// レンダリング方程式に対するモンテカルロ積分を考えると、outgoing_radiance = weight * incoming_radiance。
 	// ここで、weight = (ρ/π) * cosθ / pdf(ω) / R になる。
@@ -75,7 +60,7 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 	// 今、コサイン項に比例した確率密度関数によるサンプリングを行っているため、pdf(ω) = cosθ/π
 	// よって、weight = ρ/ R。
 
-	return now_object->material.emission + weight * incomingRadiance;
+	return now_object->material->emission + weight * incomingRadiance;
 }
 
 inline double saturate(double x) {

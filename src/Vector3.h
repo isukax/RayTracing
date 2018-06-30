@@ -7,6 +7,7 @@ class Vector3
 public:
 	Vector3();
 	Vector3(const double x, const double y, const double z);
+	//Vector3(Vector3& vec);
 
 	inline const Vector3 operator+(const Vector3& b) const 
 	{
@@ -51,6 +52,14 @@ public:
 		return *this;
 	}
 
+	inline Vector3& operator+=(const Vector3& b)
+	{
+		x += b.x;
+		y += b.y;
+		z += b.z;
+		return *this;
+	}
+
 	inline double LengthSquared() const
 	{
 		return x * x + y * y + z * z;
@@ -73,7 +82,9 @@ public:
 //{
 //	return Vector3(a.x * b, a.y * b, a.z * b);
 //}
-
+inline Vector3 operator*(double b, const Vector3 &v) {
+	return v * b;
+}
 
 inline Vector3 Normalize(const Vector3& b)
 {

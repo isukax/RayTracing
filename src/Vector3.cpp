@@ -14,4 +14,12 @@ Vector3::Vector3(const double x, const double y, const double z)
 {
 }
 
+//Vector3::Vector3(Vector3& vec)
+//	: x(vec.x)
+//	, y(vec.y)
+//	, z(vec.z)
+//{
+//}
+
+
 

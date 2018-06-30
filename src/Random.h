@@ -2,17 +2,17 @@
 
 #include <climits>
 
-class Random
+class XorShift
 {
 public:
-	Random() {}
-	virtual double Next() = 0;
-};
+	XorShift(const unsigned int initial_seed) {
+		unsigned int s = initial_seed;
+		for (int i = 1; i <= 4; i++) {
+			seed[i - 1] = s = 1812433253U * (s ^ (s >> 30)) + i;
+		}
+	}
 
-class XorShift : public Random
-{
-public:
-	virtual double Next() override
+	double Next()
 	{
 		return (double)next() / UINT_MAX;
 	}
@@ -31,3 +31,4 @@ private:
 
 };
 
+using Random = XorShift;

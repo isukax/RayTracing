@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector3.h"
+#include "Material.h"
 
 struct HitPoint
 {
@@ -25,13 +26,15 @@ private:
 	static uint32_t ObjectId;
 
 public:
-	Hitable()
-		:objectId(ObjectId++)
+	Hitable(Material material)
+		: objectId(ObjectId++)
+		, material(material)
 	{}
 	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) = 0;// { return false; }
 
 public:
 	uint32_t objectId;
+	Material material;
 };
 
 uint32_t Hitable::ObjectId = 0;

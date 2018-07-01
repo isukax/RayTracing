@@ -22,7 +22,7 @@ public:
 	{
 		delete material;
 	}
-	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) { return false; }
+	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) = 0;
 
 public:
 	uint32_t objectId;

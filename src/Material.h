@@ -1,12 +1,10 @@
 #pragma once
 
-#include "Vector3.h"
-#include "HitPoint.h"
-#include "Ray.h"
-#include "Random.h"
 #include "Constant.h"
-
-//struct HitPoint;
+#include "Vector3.h"
+#include "Ray.h"
+#include "HitPoint.h"
+#include "Random.h"
 
 using Color = Vector3;
 
@@ -43,7 +41,17 @@ public:
 
 	virtual void GetRadiance(const Ray& ray, const HitPoint& hitpoint, Random& rand, Vector3& scatterDir, Vector3& attenuation) override
 	{
-		// orienting_normalの方向を基準とした正規直交基底(w, u, v)を作る。この基底に対する半球内で次のレイを飛ばす。
+		Vector3 dir;
+		dir = ImportanceSampling(ray, hitpoint, rand);
+		//dir = RandomInUnitSphere(rand);
+		scatterDir = dir;
+		attenuation = albedo;
+	}
+private:
+	// 重点サンプリング(半球)
+	// orienting_normalの方向を基準とした正規直交基底(w, u, v)を作る。この基底に対する半球内で次のレイを飛ばす。
+	Vector3 ImportanceSampling(const Ray& ray, const HitPoint& hitpoint, Random& rand)
+	{
 		Vector3 w, u, v;
 		const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // 交差位置の法線（物体からのレイの入出を考慮）
 		w = normal;
@@ -64,10 +72,28 @@ public:
 			v * sin(phi) * theta +
 			w * sqrt(1.0 - r2)
 		);
-
-		scatterDir = dir;
-		attenuation = albedo;
+		return dir;
 	}
 
+	// 単位半径をもつ球内の点のランダムサンプリング
+	Vector3 RandomInUnitSphere(Random& rand)
+	{
+		Vector3 p;
+		do {
+			p = 2.0 * Vector3(rand.Next(), rand.Next(), rand.Next()) - Vector3(1.0, 1.0, 1.0);
+		} while (p.LengthSquared() >= 1.0);
+		return p;
+	}
+};
 
+class MetalMaterial : public Material
+{
+public:
+	MetalMaterial(Color albedo, Color emission = Color())
+		: Material(ReflectionType::REFLECTION_TYPE_SPECULAR, albedo, emission)
+	{}
+
+	virtual void GetRadiance(const Ray& ray, const HitPoint& hitpoint, Random& rand, Vector3& scatterDir, Vector3& attenuation) override
+	{
+	}
 };

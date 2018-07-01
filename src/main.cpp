@@ -48,11 +48,15 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 		russianRouletteProb = 1.0;
 	}
 
-	Vector3 dir;
-	Color albedo;
-	now_object->material->GetRadiance(ray, hitpoint, rand, dir, albedo);
-	Color incomingRadiance = color(Ray(hitpoint.position, dir), objectList, rand, depth + 1) ;
-	Color weight = now_object->material->albedo / russianRouletteProb;
+	return now_object->material->GetRadiance(ray, hitpoint, rand, depth, russianRouletteProb, [&](Vector3 dir, Color weight)
+	{
+		Color incomingRadiance = color(Ray(hitpoint.position, dir), objectList, rand, depth + 1);
+		//Color weight = now_object->material->albedo / russianRouletteProb;
+		return now_object->material->emission + weight * incomingRadiance;
+	});
+
+	//Color incomingRadiance = color(Ray(hitpoint.position, dir), objectList, rand, depth + 1) ;
+	//Color weight = now_object->material->albedo / russianRouletteProb;
 
 	// レンダリング方程式に対するモンテカルロ積分を考えると、outgoing_radiance = weight * incoming_radiance。
 	// ここで、weight = (ρ/π) * cosθ / pdf(ω) / R になる。
@@ -61,9 +65,8 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 	// 今、コサイン項に比例した確率密度関数によるサンプリングを行っているため、pdf(ω) = cosθ/π
 	// よって、weight = ρ/ R。
 
-	return now_object->material->emission + weight * incomingRadiance;
+	//return now_object->material->emission + weight * incomingRadiance;
 }
-
 
 int main(int argc, char** argv)
 {
@@ -71,7 +74,7 @@ int main(int argc, char** argv)
 	const uint32_t height = 240;// 768;
 	const double aspectRatio = double(width) / double(height);
 
-	const uint32_t superSampleNum = 2;
+	const uint32_t superSampleNum = 8;
 	const uint32_t subPixelSampleNum = 8;
 	const double focalLength = 40.0 * 1e-4;	// mm
 	const double focalPlane = 30.0 * 1e-4;	// mm

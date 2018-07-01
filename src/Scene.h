@@ -20,7 +20,8 @@ std::vector<Hitable*> scene
 	new Sphere(Vector3(50, 1e5, 81.6),			1e5,	new LambertMaterial(Color(0.75, 0.75, 0.75))),	// 床
 	new Sphere(Vector3(50, -1e5 + 81.6, 81.6),	1e5,	new LambertMaterial(Color(0.75, 0.75, 0.75))),	// 天井
 	new Sphere(Vector3(65, 20, 20),				20,		new LambertMaterial(Color(0.25, 0.75, 0.25))), // 緑球
-	new Sphere(Vector3(27, 16.5, 47),			16.5,	new MetalMaterial(Color(0.99, 0.99, 0.99), Color(), 1)), // 鏡
+	new Sphere(Vector3(27, 16.5, 47),			16.5,	new MetalMaterial(Color(0.99, 0.99, 0.99), Color(), 0)), // 鏡
+	new Sphere(Vector3(77, 16.5, 78),			16.5,	new DielectricMaterial(Color(0.99, 0.99, 0.99))), //ガラス
 	new Sphere(Vector3(50.0, 90.0, 81.6),		15.0,	new LambertMaterial(Color(), Color(36,36,36))), //照明
 };
 

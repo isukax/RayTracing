@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Vector3.h"
 
@@ -32,7 +32,7 @@ private:
 	Vector3 upDirection;
 	Vector3 rightDirection;
 	
-	// Å“_‹——£‚ª¬‚³‚¢‚Æ‰æŠp‚ªL‚­‚È‚èL”ÍˆÍ‚ğÊ‚·
+	// ç„¦ç‚¹è·é›¢ãŒå°ã•ã„ã¨ç”»è§’ãŒåºƒããªã‚Šåºƒç¯„å›²ã‚’å†™ã™
 	double focalLength;	// mm
 	double focalPlane;	// mm
 };

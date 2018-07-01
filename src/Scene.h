@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 
 #include <vector>
 #include "Hitable.h"
@@ -10,17 +10,17 @@ std::vector<Hitable*> scene
 	//new Sphere(Vector3(0, -100.5, 0),	100,	Material(Material::ReflectionType::REFLECTION_TYPE_DIFFUSE, Color(.2, .2, .2))),
 	//new Sphere(Vector3(0, 2, 0),		.5,		Material(Material::ReflectionType::REFLECTION_TYPE_DIFFUSE, Color(1, 1, 1), Color(36, 36, 36))),
 
-	////new Sphere(Vector3(27, 16.5, 47),			16.5,	Material(Material::ReflectionType::REFLECTION_TYPE_SPECULAR, Color(0.99, 0.99, 0.99))), // ãæ
-	////new Sphere(Vector3(77, 16.5, 78),			16.5,	Material(Material::ReflectionType::REFLECTION_TYPE_REFRACTION,  Color(0.99, 0.99, 0.99))), //ÉKÉâÉX
+	////new Sphere(Vector3(27, 16.5, 47),			16.5,	Material(Material::ReflectionType::REFLECTION_TYPE_SPECULAR, Color(0.99, 0.99, 0.99))), // Èè°
+	////new Sphere(Vector3(77, 16.5, 78),			16.5,	Material(Material::ReflectionType::REFLECTION_TYPE_REFRACTION,  Color(0.99, 0.99, 0.99))), //„Ç¨„É©„Çπ
 
-	new Sphere(Vector3(1e5 + 1, 40.8, 81.6),	1e5,	new LambertMaterial(Color(0.75, 0.25, 0.25))),	// ç∂
-	new Sphere(Vector3(-1e5 + 99, 40.8, 81.6),	1e5,	new LambertMaterial(Color(0.25, 0.25, 0.75))),	// âE
-	new Sphere(Vector3(50, 40.8, 1e5),			1e5,	new LambertMaterial(Color(0.75, 0.75, 0.75))),	// âú
-	new Sphere(Vector3(50, 40.8, -1e5 + 250),	1e5,	new LambertMaterial(Color())),					// éËëO
-	new Sphere(Vector3(50, 1e5, 81.6),			1e5,	new LambertMaterial(Color(0.75, 0.75, 0.75))),	// è∞
-	new Sphere(Vector3(50, -1e5 + 81.6, 81.6),	1e5,	new LambertMaterial(Color(0.75, 0.75, 0.75))),	// ìVà‰
-	new Sphere(Vector3(65, 20, 20),				20,		new LambertMaterial(Color(0.25, 0.75, 0.25))), // óŒãÖ
-	new Sphere(Vector3(50.0, 90.0, 81.6),		15.0,	new LambertMaterial(Color(), Color(36,36,36))), //è∆ñæ
+	new Sphere(Vector3(1e5 + 1, 40.8, 81.6),	1e5,	new LambertMaterial(Color(0.75, 0.25, 0.25))),	// Â∑¶
+	new Sphere(Vector3(-1e5 + 99, 40.8, 81.6),	1e5,	new LambertMaterial(Color(0.25, 0.25, 0.75))),	// Âè≥
+	new Sphere(Vector3(50, 40.8, 1e5),			1e5,	new LambertMaterial(Color(0.75, 0.75, 0.75))),	// Â••
+	new Sphere(Vector3(50, 40.8, -1e5 + 250),	1e5,	new LambertMaterial(Color())),					// ÊâãÂâç
+	new Sphere(Vector3(50, 1e5, 81.6),			1e5,	new LambertMaterial(Color(0.75, 0.75, 0.75))),	// Â∫ä
+	new Sphere(Vector3(50, -1e5 + 81.6, 81.6),	1e5,	new LambertMaterial(Color(0.75, 0.75, 0.75))),	// Â§©‰∫ï
+	new Sphere(Vector3(65, 20, 20),				20,		new LambertMaterial(Color(0.25, 0.75, 0.25))), // Á∑ëÁêÉ
+	new Sphere(Vector3(50.0, 90.0, 81.6),		15.0,	new LambertMaterial(Color(), Color(36,36,36))), //ÁÖßÊòé
 };
 
 inline bool IntersectScene(Ray& ray, std::vector<Hitable*>& scene, HitPoint& hitpoint)

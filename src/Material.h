@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Constant.h"
 #include "Vector3.h"
@@ -12,9 +12,9 @@ class Material
 {
 public:
 	enum class ReflectionType {
-		REFLECTION_TYPE_DIFFUSE,	// Š®‘SŠgU–ÊB‚¢‚í‚ä‚éLambertian–ÊB
-		REFLECTION_TYPE_SPECULAR,	// —‘z“I‚È‹¾–ÊB
-		REFLECTION_TYPE_REFRACTION,	// —‘z“I‚ÈƒKƒ‰ƒX“I•¨¿B
+		REFLECTION_TYPE_DIFFUSE,	// å®Œå…¨æ‹¡æ•£é¢ã€‚ã„ã‚ã‚†ã‚‹Lambertiané¢ã€‚
+		REFLECTION_TYPE_SPECULAR,	// ç†æƒ³çš„ãªé¡é¢ã€‚
+		REFLECTION_TYPE_REFRACTION,	// ç†æƒ³çš„ãªã‚¬ãƒ©ã‚¹çš„ç‰©è³ªã€‚
 	};
 
 	Material(ReflectionType type, Color color, Color emission = Color())
@@ -48,12 +48,12 @@ public:
 		attenuation = albedo;
 	}
 private:
-	// d“_ƒTƒ“ƒvƒŠƒ“ƒO(”¼‹…)
-	// orienting_normal‚Ì•ûŒü‚ğŠî€‚Æ‚µ‚½³‹K’¼ŒğŠî’ê(w, u, v)‚ğì‚éB‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŸ‚ÌƒŒƒC‚ğ”ò‚Î‚·B
+	// é‡ç‚¹ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°(åŠçƒ)
+	// orienting_normalã®æ–¹å‘ã‚’åŸºæº–ã¨ã—ãŸæ­£è¦ç›´äº¤åŸºåº•(w, u, v)ã‚’ä½œã‚‹ã€‚ã“ã®åŸºåº•ã«å¯¾ã™ã‚‹åŠçƒå†…ã§æ¬¡ã®ãƒ¬ã‚¤ã‚’é£›ã°ã™ã€‚
 	Vector3 ImportanceSampling(const Ray& ray, const HitPoint& hitpoint, Random& rand)
 	{
 		Vector3 w, u, v;
-		const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // Œğ·ˆÊ’u‚Ì–@üi•¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶j
+		const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // äº¤å·®ä½ç½®ã®æ³•ç·šï¼ˆç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®ï¼‰
 		w = normal;
 		if (fabs(w.x) > kEPS)
 		{
@@ -75,7 +75,7 @@ private:
 		return dir;
 	}
 
-	// ’PˆÊ”¼Œa‚ğ‚à‚Â‹…“à‚Ì“_‚Ìƒ‰ƒ“ƒ_ƒ€ƒTƒ“ƒvƒŠƒ“ƒO
+	// å˜ä½åŠå¾„ã‚’ã‚‚ã¤çƒå†…ã®ç‚¹ã®ãƒ©ãƒ³ãƒ€ãƒ ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°
 	Vector3 RandomInUnitSphere(Random& rand)
 	{
 		Vector3 p;

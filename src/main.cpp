@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <algorithm>
 #include <direct.h>
 #include "Vector3.h"
@@ -20,20 +20,20 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 	{
 		return Color();
 	}
-	const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // Œğ·ˆÊ’u‚Ì–@üi•¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶j
+	const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // äº¤å·®ä½ç½®ã®æ³•ç·šï¼ˆç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®ï¼‰
 	Hitable* now_object = objectList[hitpoint.objectId];
-	// F‚Ì”½Ë—¦Å‘å‚Ì‚à‚Ì‚ğ“¾‚éBƒƒVƒAƒ“ƒ‹[ƒŒƒbƒg‚Åg‚¤B
-	// ƒƒVƒAƒ“ƒ‹[ƒŒƒbƒg‚Ìè‡’l‚Í”CˆÓ‚¾‚ªF‚Ì”½Ë—¦“™‚ğg‚¤‚Æ‚æ‚è—Ç‚¢B
+	// è‰²ã®åå°„ç‡æœ€å¤§ã®ã‚‚ã®ã‚’å¾—ã‚‹ã€‚ãƒ­ã‚·ã‚¢ãƒ³ãƒ«ãƒ¼ãƒ¬ãƒƒãƒˆã§ä½¿ã†ã€‚
+	// ãƒ­ã‚·ã‚¢ãƒ³ãƒ«ãƒ¼ãƒ¬ãƒƒãƒˆã®é–¾å€¤ã¯ä»»æ„ã ãŒè‰²ã®åå°„ç‡ç­‰ã‚’ä½¿ã†ã¨ã‚ˆã‚Šè‰¯ã„ã€‚
 	double russianRouletteProb = std::max(now_object->material->albedo.x, std::max(now_object->material->albedo.y, now_object->material->albedo.z));
 
-	// ”½Ë‰ñ”‚ªˆê’èˆÈã‚É‚È‚Á‚½‚çƒƒVƒAƒ“ƒ‹[ƒŒƒbƒg‚ÌŠm—¦‚ğ‹}ã¸‚³‚¹‚éBiƒXƒ^ƒbƒNƒI[ƒo[ƒtƒ[‘Îôj
+	// åå°„å›æ•°ãŒä¸€å®šä»¥ä¸Šã«ãªã£ãŸã‚‰ãƒ­ã‚·ã‚¢ãƒ³ãƒ«ãƒ¼ãƒ¬ãƒƒãƒˆã®ç¢ºç‡ã‚’æ€¥ä¸Šæ˜‡ã•ã›ã‚‹ã€‚ï¼ˆã‚¹ã‚¿ãƒƒã‚¯ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼å¯¾ç­–ï¼‰
 	if (depth > kDepthLimit)
 	{
 		russianRouletteProb *= pow(0.5, depth - kDepthLimit);
 	}
 
-	// ƒƒVƒAƒ“ƒ‹[ƒŒƒbƒg‚ğÀs‚µ’ÇÕ‚ğ‘Å‚¿Ø‚é‚©‚Ç‚¤‚©‚ğ”»’f‚·‚éB
-	// ‚½‚¾‚µDepth‰ñ‚Ì’ÇÕ‚Í•Ûá‚·‚éB
+	// ãƒ­ã‚·ã‚¢ãƒ³ãƒ«ãƒ¼ãƒ¬ãƒƒãƒˆã‚’å®Ÿè¡Œã—è¿½è·¡ã‚’æ‰“ã¡åˆ‡ã‚‹ã‹ã©ã†ã‹ã‚’åˆ¤æ–­ã™ã‚‹ã€‚
+	// ãŸã ã—Depthå›ã®è¿½è·¡ã¯ä¿éšœã™ã‚‹ã€‚
 	if (depth > kDepth)
 	{
 		if (rand.Next() >= russianRouletteProb)
@@ -54,12 +54,12 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 	Color incomingRadiance = color(Ray(hitpoint.position, dir), objectList, rand, depth + 1) ;
 	Color weight = now_object->material->albedo / russianRouletteProb;
 
-	// ƒŒƒ“ƒ_ƒŠƒ“ƒO•û’ö®‚É‘Î‚·‚éƒ‚ƒ“ƒeƒJƒ‹ƒÏ•ª‚ğl‚¦‚é‚ÆAoutgoing_radiance = weight * incoming_radianceB
-	// ‚±‚±‚ÅAweight = (ƒÏ/ƒÎ) * cosƒÆ / pdf(ƒÖ) / R ‚É‚È‚éB
-	// ƒÏ/ƒÎ‚ÍŠ®‘SŠgU–Ê‚ÌBRDF‚ÅƒÏ‚Í”½Ë—¦AcosƒÆ‚ÍƒŒƒ“ƒ_ƒŠƒ“ƒO•û’ö®‚É‚¨‚¯‚éƒRƒTƒCƒ“€Apdf(ƒÖ)‚ÍƒTƒ“ƒvƒŠƒ“ƒO•ûŒü‚É‚Â‚¢‚Ä‚ÌŠm—¦–§“xŠÖ”B
-	// R‚ÍƒƒVƒAƒ“ƒ‹[ƒŒƒbƒg‚ÌŠm—¦B
-	// ¡AƒRƒTƒCƒ“€‚É”ä—á‚µ‚½Šm—¦–§“xŠÖ”‚É‚æ‚éƒTƒ“ƒvƒŠƒ“ƒO‚ğs‚Á‚Ä‚¢‚é‚½‚ßApdf(ƒÖ) = cosƒÆ/ƒÎ
-	// ‚æ‚Á‚ÄAweight = ƒÏ/ RB
+	// ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°æ–¹ç¨‹å¼ã«å¯¾ã™ã‚‹ãƒ¢ãƒ³ãƒ†ã‚«ãƒ«ãƒ­ç©åˆ†ã‚’è€ƒãˆã‚‹ã¨ã€outgoing_radiance = weight * incoming_radianceã€‚
+	// ã“ã“ã§ã€weight = (Ï/Ï€) * cosÎ¸ / pdf(Ï‰) / R ã«ãªã‚‹ã€‚
+	// Ï/Ï€ã¯å®Œå…¨æ‹¡æ•£é¢ã®BRDFã§Ïã¯åå°„ç‡ã€cosÎ¸ã¯ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°æ–¹ç¨‹å¼ã«ãŠã‘ã‚‹ã‚³ã‚µã‚¤ãƒ³é …ã€pdf(Ï‰)ã¯ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°æ–¹å‘ã«ã¤ã„ã¦ã®ç¢ºç‡å¯†åº¦é–¢æ•°ã€‚
+	// Rã¯ãƒ­ã‚·ã‚¢ãƒ³ãƒ«ãƒ¼ãƒ¬ãƒƒãƒˆã®ç¢ºç‡ã€‚
+	// ä»Šã€ã‚³ã‚µã‚¤ãƒ³é …ã«æ¯”ä¾‹ã—ãŸç¢ºç‡å¯†åº¦é–¢æ•°ã«ã‚ˆã‚‹ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã‚’è¡Œã£ã¦ã„ã‚‹ãŸã‚ã€pdf(Ï‰) = cosÎ¸/Ï€
+	// ã‚ˆã£ã¦ã€weight = Ï/ Rã€‚
 
 	return now_object->material->emission + weight * incomingRadiance;
 }
@@ -85,8 +85,8 @@ int main(int argc, char** argv)
 	const Vector3 camDir = Normalize(Vector3(0.0, -0.04, -1.0));
 	Camera camera(camPos, camDir, focalLength, focalPlane);
 
-	// ƒCƒ[ƒWƒZƒ“ƒT[
-	// ƒ[ƒ‹ƒhÀ•WŒnã‚ÉƒXƒNƒŠ[ƒ“‚ğ”z’u
+	// ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µãƒ¼
+	// ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ç³»ä¸Šã«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã‚’é…ç½®
 	const double screenWidth = camera.GetFocalPlane() * aspectRatio;
 	const double screenHeight = camera.GetFocalPlane();
 
@@ -119,14 +119,14 @@ int main(int argc, char** argv)
 			{
 				for (auto sx = 0; sx < superSampleNum; ++sx)
 				{
-					// ˆê‚Â‚ÌƒTƒuƒsƒNƒZƒ‹‚ ‚½‚è•¡”‰ñƒTƒ“ƒvƒŠƒ“ƒO‚·‚é
+					// ä¸€ã¤ã®ã‚µãƒ–ãƒ”ã‚¯ã‚»ãƒ«ã‚ãŸã‚Šè¤‡æ•°å›ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹
 					for (int s = 0; s < subPixelSampleNum; s++) {
 
 						const double ratio = (1.0 / superSampleNum);
-						const double rx = sx * ratio + ratio / 2.0;	// (ƒTƒuƒsƒNƒZƒ‹ˆÊ’u) + (ƒTƒuƒsƒNƒZƒ‹’†S‚Ö‚ÌƒIƒtƒZƒbƒg)
+						const double rx = sx * ratio + ratio / 2.0;	// (ã‚µãƒ–ãƒ”ã‚¯ã‚»ãƒ«ä½ç½®) + (ã‚µãƒ–ãƒ”ã‚¯ã‚»ãƒ«ä¸­å¿ƒã¸ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ)
 						const double ry = sy * ratio + ratio / 2.0;
 
-						// -0.5‚Í’†SŠî€‚É‚È‚Á‚Ä‚¢‚é‚½‚ß
+						// -0.5ã¯ä¸­å¿ƒåŸºæº–ã«ãªã£ã¦ã„ã‚‹ãŸã‚
 						Vector3 screenPos = screenCenter +
 							(screenX * ((x + rx) / width - 0.5)) +
 							(screenY * ((y + ry) / height - 0.5));

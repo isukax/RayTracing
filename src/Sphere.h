@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 
 #include "Vector3.h"
 #include "Ray.h"
@@ -49,7 +49,7 @@ public:
 		//double b = 2 * Dot(ray.direction, amc);
 		//double c = Dot(amc, amc) - (radius * radius);
 
-		//// îªï éÆ
+		//// Âà§Âà•Âºè
 		//double discriminant = b * b - 4 * a * c;
 		//if (discriminant < 0)
 		//{

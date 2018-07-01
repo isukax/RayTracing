@@ -106,7 +106,7 @@ public:
 	{
 		const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // 交差位置の法線（物体からのレイの入出を考慮）
 		Vector3 r = Reflect(ray.direction, normal);
-		scatterDir = r + roughness * RandomInUnitSphere(rand);
+		scatterDir = Normalize(r + roughness * RandomInUnitSphere(rand));
 		attenuation = albedo;
 	}
 

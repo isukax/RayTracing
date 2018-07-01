@@ -8,6 +8,13 @@
 
 using Color = Vector3;
 
+// normalは正規化済み前提
+// dirは入射していく方向を指す
+inline Vector3 Reflect(const Vector3& dir, const Vector3& normal)
+{
+	return dir - 2.0 * normal * Dot(dir, normal);
+}
+
 class Material
 {
 public:
@@ -25,6 +32,17 @@ public:
 	}
 	
 	virtual void GetRadiance(const Ray& ray, const HitPoint& hitpoint, Random& rand, Vector3& scatterDir, Vector3& attenuation) = 0;
+
+protected:
+	// 単位半径をもつ球内の点のランダムサンプリング
+	Vector3 RandomInUnitSphere(Random& rand)
+	{
+		Vector3 p;
+		do {
+			p = 2.0 * Vector3(rand.Next(), rand.Next(), rand.Next()) - Vector3(1.0, 1.0, 1.0);
+		} while (p.LengthSquared() >= 1.0);
+		return p;
+	}
 
 public:
 	ReflectionType reflType;
@@ -74,26 +92,24 @@ private:
 		);
 		return dir;
 	}
-
-	// 単位半径をもつ球内の点のランダムサンプリング
-	Vector3 RandomInUnitSphere(Random& rand)
-	{
-		Vector3 p;
-		do {
-			p = 2.0 * Vector3(rand.Next(), rand.Next(), rand.Next()) - Vector3(1.0, 1.0, 1.0);
-		} while (p.LengthSquared() >= 1.0);
-		return p;
-	}
 };
 
 class MetalMaterial : public Material
 {
 public:
-	MetalMaterial(Color albedo, Color emission = Color())
+	MetalMaterial(Color albedo, Color emission = Color(), double roughness = 0)
 		: Material(ReflectionType::REFLECTION_TYPE_SPECULAR, albedo, emission)
+		, roughness(roughness)
 	{}
 
 	virtual void GetRadiance(const Ray& ray, const HitPoint& hitpoint, Random& rand, Vector3& scatterDir, Vector3& attenuation) override
 	{
+		const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // 交差位置の法線（物体からのレイの入出を考慮）
+		Vector3 r = Reflect(ray.direction, normal);
+		scatterDir = r + roughness * RandomInUnitSphere(rand);
+		attenuation = albedo;
 	}
+
+private:
+	double roughness;
 };

@@ -1,5 +1,6 @@
 #include <iostream>
-#include <fstream>
+#include <algorithm>
+#include <direct.h>
 #include "Vector3.h"
 #include "Ray.h"
 #include "Sphere.h"
@@ -7,8 +8,8 @@
 #include "Camera.h"
 #include "Random.h"
 #include "Material.h"
-#include "Type.h"
-#include <algorithm>
+#include "HitPoint.h"
+#include "Ppm.h"
 
 // namespace
 Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t depth)
@@ -63,39 +64,17 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 	return now_object->material->emission + weight * incomingRadiance;
 }
 
-inline double saturate(double x) {
-	if (x < 0.0)
-		return 0.0;
-	if (x > 1.0)
-		return 1.0;
-	return x;
-}
-
-inline int ToInt(double x)
-{
-	return int(pow(saturate(x), 1 / 2.2) * 255 + 0.5);
-}
-
-void save_ppm_file(const std::string &filename, const Color *image, const int width, const int height) {
-	FILE *f = fopen(filename.c_str(), "wb");
-	fprintf(f, "P3\n%d %d\n%d\n", width, height, 255);
-	for (int i = 0; i < width * height; i++)
-		fprintf(f, "%d %d %d ", ToInt(image[i].x), ToInt(image[i].y), ToInt(image[i].z));
-	fclose(f);
-}
 
 int main(int argc, char** argv)
 {
-	//render(320, 240, 8, 2);	return 0;;
-
 	const uint32_t width = 320;//1024;
 	const uint32_t height = 240;// 768;
 	const double aspectRatio = double(width) / double(height);
 
 	const uint32_t superSampleNum = 2;
 	const uint32_t subPixelSampleNum = 8;
-	const double focalLength = 40.0;	// mm
-	const double focalPlane = 30.0;		// mm
+	const double focalLength = 40.0 * 1e-4;	// mm
+	const double focalPlane = 30.0 * 1e-4;	// mm
 
 	//const Vector3 camPos(0, 0, -10);
 	//const Vector3 targetPos(0, 0, 0);
@@ -165,7 +144,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	save_ppm_file(std::string("result.ppm"), image, width, height);
+	Ppm::Save(std::string("image/result.ppm"), image, width, height);
 	delete[] image;
 
 	return 0;

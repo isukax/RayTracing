@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Vector3.h"
-#include "Type.h"
+#include "HitPoint.h"
 #include "Ray.h"
 #include "Random.h"
 #include "Constant.h"

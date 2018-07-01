@@ -4,7 +4,7 @@
 #include "Ray.h"
 #include "Material.h"
 #include "Constant.h"
-#include "Type.h"
+#include "HitPoint.h"
 #include "Hitable.h"
 
 class Sphere : public Hitable

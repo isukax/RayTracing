@@ -5,9 +5,19 @@
 class Vector3
 {
 public:
-	Vector3();
-	Vector3(const double x, const double y, const double z);
-	//Vector3(Vector3& vec);
+	Vector3()
+		: x(0)
+		, y(0)
+		, z(0)
+	{
+	}
+
+	Vector3(const double x, const double y, const double z)
+		: x(x)
+		, y(y)
+		, z(z)
+	{
+	}
 
 	inline const Vector3 operator+(const Vector3& b) const 
 	{
@@ -70,12 +80,9 @@ public:
 		return sqrt(LengthSquared());
 	}
 
-
-
 	double x;
 	double y;
 	double z;
-
 };
 
 //inline const Vector3 operator*(const double b, const Vector3& a)

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include "Constant.h"
-#include "Type.h"
+#include "HitPoint.h"
 #include "Vector3.h"
 #include "Ray.h"
 #include "Material.h"

@@ -20,13 +20,14 @@ inline Vector3 Reflect(const Vector3& dir, const Vector3& normal)
 }
 
 // スネルの法則
-// iorは相対屈折率
-inline Vector3 Refract(const Vector3& dir, const Vector3& normal, double ior)
+inline Vector3 Refract(const Vector3& dir, const Vector3& normal, double iorIn, double iorOut)
 {
-	double VN = Dot(dir, normal);
-	return -ior * (dir - VN * normal) - normal * sqrt(1.0 - (ior * ior) * (1.0 - VN * VN));
-
-	//return Normalize(dir * ior -normal * (into ? 1.0 : -1.0) * (ddn * ior + sqrt(cos2t))));
+	//https://knzw.tech/raytracing/?page_id=478
+	double c = Dot(dir, normal);
+	double n = iorOut / iorIn;
+	double g = sqrt(n * n + c * c - 1.0);
+	return Normalize(1.0 / n * (dir + (c - g) * normal));
+	//return Normalize((iorIn / iorOut) * (dir - (sqrt(pow(iorOut / iorIn, 2) - (1 - c * c)) - c) * normal));
 }
 
 class Material
@@ -102,7 +103,7 @@ private:
 			u * cos(phi) * theta +
 			v * sin(phi) * theta +
 			w * sqrt(1.0 - r2)
-		);
+			);
 		return dir;
 	}
 };
@@ -130,7 +131,7 @@ private:
 };
 
 
-class DielectricMaterial: public Material
+class DielectricMaterial : public Material
 {
 public:
 	DielectricMaterial(Color albedo, Color emission = Color(), double ior = 1.5)
@@ -142,12 +143,10 @@ public:
 	{
 		const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // 交差位置の法線（物体からのレイの入出を考慮）
 		const bool isIncidence = Dot(hitpoint.normal, normal) > 0.0; // レイがオブジェクトから出るのか、入るのか
-	
-		// 符号間違い絶対ある...
 
 		const double iorAir = 1.0;
 		const double iorIn = isIncidence ? iorAir : ior;
-		const double iorOut = isIncidence ? ior : iorIn;
+		const double iorOut = isIncidence ? ior : iorAir;
 		const double relativeIor = iorIn / iorOut;
 		const double VN = Dot(ray.direction, normal);
 		const double cosTheta2 = 1.0 - relativeIor * relativeIor * (1.0 - VN * VN);
@@ -159,8 +158,7 @@ public:
 			return func(reflectDir, weight);
 		}
 
-		Vector3 refractDir = Refract(-ray.direction, hitpoint.normal, relativeIor);
-		refractDir = Normalize(ray.direction * ior - hitpoint.normal * (isIncidence ? 1.0 : -1.0) * (VN * ior + sqrt(cosTheta2)));
+		const Vector3 refractDir = Refract(ray.direction, hitpoint.normal, iorIn, iorOut);
 
 		const double f0 = Fresnel0(iorIn, iorOut);
 		// VNにマイナスがつくのはray.directionが逆だから
@@ -168,7 +166,7 @@ public:
 		// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する。
 		const double fr = FresnelShlick(f0, cos);
 		// 屈折方向の光が屈折してray.dirの方向に運ぶ割合
-		const double tr = (1.0 - fr) * relativeIor * relativeIor;
+		const double tr = (1.0 - fr) * relativeIor * relativeIor; // レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する。
 
 		// 一定以上レイを追跡したら屈折と反射のどちらか一方を追跡する。（さもないと指数的にレイが増える）
 		// ロシアンルーレットで決定する。

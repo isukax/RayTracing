@@ -2,7 +2,6 @@
 
 #include "Vector3.h"
 #include "Ray.h"
-#include "Material.h"
 #include "Constant.h"
 #include "HitPoint.h"
 #include "Hitable.h"
@@ -11,7 +10,7 @@ class Sphere : public Hitable
 {
 public:
 	Sphere() = delete;
-	Sphere(const Vector3 pos, const double radius, Material* material)
+	Sphere(const Vector3 pos, const double radius, MaterialPtr material)
 		: Hitable(material)
 		, position(pos)
 		, radius(radius)

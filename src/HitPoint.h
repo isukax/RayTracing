@@ -10,12 +10,16 @@ public:
 	Vector3 position;
 	Vector3 normal;
 	double distance;
+	double u;
+	double v;
 
 	HitPoint()
 		: objectId(-1)
 		, position()
 		, normal()
 		, distance(kINF)
+		, u()
+		, v()
 	{}
 };
 

@@ -7,8 +7,8 @@
 #include "Ray.h"
 #include "HitPoint.h"
 #include "Random.h"
+#include "Texture.h"
 
-using Color = Vector3;
 class Hitable;
 
 // normalは正規化済み前提
@@ -30,6 +30,9 @@ inline Vector3 Refract(const Vector3& dir, const Vector3& normal, double iorIn, 
 	//return Normalize((iorIn / iorOut) * (dir - (sqrt(pow(iorOut / iorIn, 2) - (1 - c * c)) - c) * normal));
 }
 
+class Material;
+using MaterialPtr = std::shared_ptr<Material>;
+
 class Material
 {
 public:
@@ -39,9 +42,9 @@ public:
 		REFLECTION_TYPE_REFRACTION,	// 理想的なガラス的物質。
 	};
 
-	Material(ReflectionType type, Color color, Color emission = Color())
+	Material(ReflectionType type, TexturePtr albedo, Color emission = Color())
 		: reflType(type)
-		, albedo(color)
+		, albedo(albedo)
 		, emission(emission)
 	{
 	}
@@ -59,16 +62,17 @@ protected:
 	}
 
 public:
+	TexturePtr albedo;
 	ReflectionType reflType;
-	Color albedo;
 	Color emission;
 };
 
 class LambertMaterial : public Material
 {
 public:
-	LambertMaterial(Color albedo, Color emission = Color())
+	LambertMaterial(TexturePtr albedo, Color emission = Color())
 		: Material(ReflectionType::REFLECTION_TYPE_DIFFUSE, albedo, emission)
+		//, albedo(albedo)
 	{}
 
 	virtual Color GetRadiance(const Ray& ray, const HitPoint& hitpoint, Random& rand, uint32_t depth, double russianRouletteProb, std::function<Color(Vector3 dir, Color weight)> func) override
@@ -76,9 +80,10 @@ public:
 		Vector3 dir;
 		dir = ImportanceSampling(ray, hitpoint, rand);
 		//dir = RandomInUnitSphere(rand);
-		Color weight = albedo / russianRouletteProb;
+		Color weight = albedo->value(hitpoint.u, hitpoint.v, hitpoint.position) / russianRouletteProb;
 		return func(dir, weight);
 	}
+
 private:
 	// 重点サンプリング(半球)
 	// orienting_normalの方向を基準とした正規直交基底(w, u, v)を作る。この基底に対する半球内で次のレイを飛ばす。
@@ -106,13 +111,18 @@ private:
 			);
 		return dir;
 	}
+
+private:
+	//TexturePtr albedo;
+
 };
 
 class MetalMaterial : public Material
 {
 public:
-	MetalMaterial(Color albedo, Color emission = Color(), double roughness = 0)
+	MetalMaterial(TexturePtr albedo, Color emission = Color(), double roughness = 0)
 		: Material(ReflectionType::REFLECTION_TYPE_SPECULAR, albedo, emission)
+		//, albedo(color)
 		, roughness(roughness)
 	{}
 
@@ -122,11 +132,12 @@ public:
 
 		Vector3 reflectDir = Reflect(ray.direction, normal);
 		Vector3 scatterDir = Normalize(reflectDir + roughness * RandomInUnitSphere(rand));
-		Color weight = albedo / russianRouletteProb;
+		Color weight = albedo->value(hitpoint.u, hitpoint.v, hitpoint.position) / russianRouletteProb;
 		return func(scatterDir, weight);
 	}
 
 private:
+	//TexturePtr albedo;
 	double roughness;
 };
 
@@ -134,7 +145,7 @@ private:
 class DielectricMaterial : public Material
 {
 public:
-	DielectricMaterial(Color albedo, Color emission = Color(), double ior = 1.5)
+	DielectricMaterial(TexturePtr albedo, Color emission = Color(), double ior = 1.5)
 		: Material(ReflectionType::REFLECTION_TYPE_SPECULAR, albedo, emission)
 		, ior(ior)
 	{}
@@ -154,7 +165,7 @@ public:
 
 		// 全反射
 		if (cosTheta2 < 0.0) {
-			Color weight = albedo / russianRouletteProb;
+			Color weight = albedo->value(hitpoint.u, hitpoint.v, hitpoint.position) / russianRouletteProb;
 			return func(reflectDir, weight);
 		}
 
@@ -166,6 +177,7 @@ public:
 		// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する。
 		const double fr = FresnelShlick(f0, cos);
 		// 屈折方向の光が屈折してray.dirの方向に運ぶ割合
+		// カメラから光にトレースしているため、光の向きが逆なので屈折宝庫からくる光は
 		const double tr = (1.0 - fr) * relativeIor * relativeIor; // レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する。
 
 		// 一定以上レイを追跡したら屈折と反射のどちらか一方を追跡する。（さもないと指数的にレイが増える）
@@ -175,19 +187,19 @@ public:
 		{
 			if (rand.Next() < prob)
 			{
-				Color weight = albedo / (prob * russianRouletteProb) * fr;
+				Color weight = albedo->value(hitpoint.u, hitpoint.v, hitpoint.position) / (prob * russianRouletteProb) * fr;
 				return func(reflectDir, weight);
 			}
 			else
 			{
-				Color weight = albedo / ((1.0 - prob) * russianRouletteProb) * tr;
+				Color weight = albedo->value(hitpoint.u, hitpoint.v, hitpoint.position) / ((1.0 - prob) * russianRouletteProb) * tr;
 				return func(refractDir, weight);
 			}
 		}
 		else
 		{
 			// 屈折と反射の両方を追跡
-			Color weight = albedo / russianRouletteProb;
+			Color weight = albedo->value(hitpoint.u, hitpoint.v, hitpoint.position) / russianRouletteProb;
 			return
 				func(reflectDir, weight * fr) +
 				func(refractDir, weight* tr);
@@ -208,4 +220,5 @@ private:
 
 private:
 	double ior;
+	//Color albedo;
 };

@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <chrono>
 #include <algorithm>
 #include <direct.h>
 #include "Vector3.h"
@@ -12,7 +13,7 @@
 #include "Ppm.h"
 
 // namespace
-Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t depth)
+Color color(Ray& ray, std::vector<HitablePtr>& objectList, Random& rand, uint32_t depth)
 {
 	HitPoint hitpoint;
 
@@ -21,10 +22,11 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 		return Color();
 	}
 	const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // 交差位置の法線（物体からのレイの入出を考慮）
-	Hitable* now_object = objectList[hitpoint.objectId];
+	HitablePtr now_object = objectList[hitpoint.objectId];
 	// 色の反射率最大のものを得る。ロシアンルーレットで使う。
 	// ロシアンルーレットの閾値は任意だが色の反射率等を使うとより良い。
-	double russianRouletteProb = std::max(now_object->material->albedo.x, std::max(now_object->material->albedo.y, now_object->material->albedo.z));
+	auto& albedo = now_object->material->albedo->value(hitpoint.u, hitpoint.v, hitpoint.position);
+	double russianRouletteProb = std::max(albedo.x, std::max(albedo.y, albedo.z));
 
 	// 反射回数が一定以上になったらロシアンルーレットの確率を急上昇させる。（スタックオーバーフロー対策）
 	if (depth > kDepthLimit)
@@ -68,16 +70,31 @@ Color color(Ray& ray, std::vector<Hitable*>& objectList, Random& rand, uint32_t 
 	//return now_object->material->emission + weight * incomingRadiance;
 }
 
+Vector3 RandomInUnitDisk(Random& rand) {
+	Vector3 p;
+	do {
+		p = 2.0 * Vector3(rand.Next(), rand.Next(), 0) - Vector3(1, 1, 0);
+	} while (Dot(p, p) >= 1.0);
+	return p;
+}
+
 int main(int argc, char** argv)
 {
+	std::chrono::system_clock::time_point start, end;
+
 	const uint32_t width = 320;//1024;
 	const uint32_t height = 240;// 768;
 	const double aspectRatio = double(width) / double(height);
 
-	const uint32_t superSampleNum = 8;
+	const uint32_t superSampleNum = 4;
 	const uint32_t subPixelSampleNum = 8;
-	const double focalLength = 40.0 * 1e-4;	// mm
-	const double focalPlane = 30.0 * 1e-4;	// mm
+	const double focalLength = 40.0 * 1e-3;	// mm
+	const double focalPlane = 30.0 * 1e-3;	// mm
+	const double cocSize = 0.03328 * 1e-3;	//mm
+	const double aperture = 1;
+	const double FNumber = focalLength / aperture;
+
+	//double forwardDoF = (cocSize * FNumber *   
 
 	//const Vector3 camPos(0, 0, -10);
 	//const Vector3 targetPos(0, 0, 0);
@@ -97,19 +114,19 @@ int main(int argc, char** argv)
 	const Vector3 screenY = camera.GetUpDirection() * screenHeight;
 	const Vector3 screenCenter = camera.GetPosition() + camera.GetDirection() * camera.GetFocalLength();
 
-	// Monte Carlo
-	// Biased Unbiased
-	// Super Sampling
-	// Importance Sampling
-	// Russian roulette
 	// Bidirectional Path tracing
 	// BVH KDTREE
 
-	//std::ofstream ofs("result.ppm");
 	Color *image = new Color[width * height];
 	std::cout << width << "x" << height << " " << subPixelSampleNum * (superSampleNum * superSampleNum) << " spp" << std::endl;
 
-#pragma omp parallel for schedule(dynamic, 1) num_threads(4)
+	start = std::chrono::system_clock::now();
+
+	// TODO シーンクラス作る
+	// render関数呼んでimageを作るようにする
+	// rendererは分ける？
+
+#pragma omp parallel for schedule(dynamic, 1) num_threads(8)
 	for (auto y = 0; y < height; ++y)
 	{
 		std::cerr << "Rendering (y = " << y << ") " << (100.0 * y / (height - 1)) << "%" << std::endl;
@@ -146,6 +163,12 @@ int main(int argc, char** argv)
 			image[image_index] += accumlator;
 		}
 	}
+
+	end = std::chrono::system_clock::now();
+	double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cerr << "time : " << elapsed << std::endl;
+
+	//_sleep(5000);
 
 	Ppm::Save(std::string("image/result.ppm"), image, width, height);
 	delete[] image;

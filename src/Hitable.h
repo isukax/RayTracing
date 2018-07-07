@@ -7,26 +7,30 @@
 #include "Ray.h"
 #include "Material.h"
 
+class Hitalble;
+using HitablePtr = std::shared_ptr<Hitable>;
+
 class Hitable
 {
 private:
 	static uint32_t ObjectId;
 	
 public:
-	Hitable(Material* material)
+	Hitable(MaterialPtr material)
 		: objectId(ObjectId++)
 		, material(material)
 	{
 	}
+
 	~Hitable()
 	{
-		delete material;
 	}
+
 	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) = 0;
 
 public:
 	uint32_t objectId;
-	Material* material;
+	MaterialPtr material;
 };
 
 uint32_t Hitable::ObjectId = 0;

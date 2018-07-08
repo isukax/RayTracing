@@ -17,6 +17,14 @@ public:
 	{
 	}
 
+	void SetUv(const Vector3&p, double& u, double& v)
+	{
+		float phi = atan2(p.x, p.z);
+		float theta = asin(p.y);
+		u = 1.f - (phi + kPI) / kPI2;
+		v = (theta + kPI / 2.f) / kPI;
+	}
+
 	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
 	{
 		const Vector3 p_o = position - ray.origin;
@@ -41,6 +49,7 @@ public:
 
 		hitpoint.position = ray.origin + ray.direction * hitpoint.distance;
 		hitpoint.normal = Normalize(hitpoint.position - position);
+		SetUv(hitpoint.normal, hitpoint.u, hitpoint.v);
 		return true;
 
 		//Vector3 amc = (ray.origin - position);

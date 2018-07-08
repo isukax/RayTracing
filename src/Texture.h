@@ -1,4 +1,5 @@
 ﻿#pragma once
+#define STB_IMAGE_IMPLEMENTATION
 
 #include <cstdint>
 #include <memory>
@@ -6,6 +7,8 @@
 #include "Constant.h"
 #include "Vector3.h"
 #include "Ray.h"
+#include <stb/stb_image.h>
+
 
 class Texture;
 using TexturePtr = std::shared_ptr<Texture>;
@@ -52,4 +55,43 @@ private:
 	TexturePtr oddTex;
 	TexturePtr evenTex;
 	double freq;
+};
+
+class ImageTexture : public Texture
+{
+public:
+	ImageTexture(std::string fileName)
+	{
+		int n;
+		texels = stbi_load(fileName.c_str(), &width, &height, &n, 0);
+	}
+
+	~ImageTexture()
+	{
+		stbi_image_free(texels);
+	}
+
+	virtual Vector3 value(double u, double v, const Vector3& p) const override
+	{
+		int s = (u * width);
+		int t = ((1 - v) * height - 0.001);
+		return sample(s, t);
+	}
+
+	Color sample(int s, int t) const
+	{
+		s = (s < 0) ? 0 : (s >= width) ? width - 1 : s;
+		t = (t < 0) ? 0 : (t >= height) ? height - 1 : t;
+
+		return Color(
+			int(texels[3 * s + 3 * width * t]) / 255.0,
+			int(texels[3 * s + 3 * width * t + 1]) / 255.0,
+			int(texels[3 * s + 3 * width * t + 2]) / 255.0
+		);
+	}
+
+private:
+	int width;
+	int height;
+	unsigned char* texels;
 };

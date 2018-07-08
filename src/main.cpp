@@ -82,8 +82,8 @@ int main(int argc, char** argv)
 {
 	std::chrono::system_clock::time_point start, end;
 
-	const uint32_t width = 320;//1024;
-	const uint32_t height = 240;// 768;
+	const uint32_t width = 320;//1024
+	const uint32_t height = 240;//768
 	const double aspectRatio = double(width) / double(height);
 
 	const uint32_t superSampleNum = 4;
@@ -165,7 +165,7 @@ int main(int argc, char** argv)
 	}
 
 	end = std::chrono::system_clock::now();
-	double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	int64_t elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	std::cerr << "time : " << elapsed << std::endl;
 
 	//_sleep(5000);

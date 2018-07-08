@@ -2,6 +2,9 @@
 
 #include "Vector3.h"
 
+class Camera;
+using CameraPtr = std::shared_ptr<Camera>;
+
 class Camera
 {
 public:

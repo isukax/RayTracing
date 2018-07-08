@@ -3,10 +3,12 @@
 #include "Constant.h"
 #include "Vector3.h"
 
+class Hitable;
+
 struct HitPoint
 {
 public:
-	uint32_t objectId;
+	std::shared_ptr<Hitable> object;
 	Vector3 position;
 	Vector3 normal;
 	double distance;
@@ -14,12 +16,12 @@ public:
 	double v;
 
 	HitPoint()
-		: objectId(-1)
-		, position()
+		: position()
 		, normal()
 		, distance(kINF)
 		, u()
 		, v()
+		, object(nullptr)
 	{}
 };
 

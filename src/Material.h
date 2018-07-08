@@ -141,7 +141,6 @@ private:
 	double roughness;
 };
 
-
 class DielectricMaterial : public Material
 {
 public:

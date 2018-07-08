@@ -9,7 +9,6 @@
 #include "Ray.h"
 #include <stb/stb_image.h>
 
-
 class Texture;
 using TexturePtr = std::shared_ptr<Texture>;
 
@@ -73,8 +72,8 @@ public:
 
 	virtual Vector3 value(double u, double v, const Vector3& p) const override
 	{
-		int s = (u * width);
-		int t = ((1 - v) * height - 0.001);
+		int s = int(u * width);
+		int t = int((1 - v) * height - 0.001);
 		return sample(s, t);
 	}
 

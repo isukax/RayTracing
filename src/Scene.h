@@ -14,13 +14,19 @@ public:
 	Scene(CameraPtr camera)
 		: camera(camera)
 		, objectList()
+		, iblTexture()
 	{}
 
 	void Add(HitablePtr object) { objectList.push_back(object); }
 	void Add(std::vector<HitablePtr> list) { objectList.insert(objectList.end(), list.begin(), list.end()); }
-	
+	void SetIblTexture(std::string fileName)
+	{
+		iblTexture = std::make_shared<ImageTexture>(fileName);
+	}
+
 	const std::vector<HitablePtr>& GetObjectList() const { return objectList; }
 	const CameraPtr GetCamera() const { return camera; }
+	const ImageTexturePtr GetIblTexture() const { return iblTexture; }
 
 	bool Intersect(Ray& ray, HitPoint& hitpoint)
 	{
@@ -55,5 +61,6 @@ public:
 private:
 	CameraPtr camera;
 	std::vector<HitablePtr> objectList;
+	ImageTexturePtr iblTexture;
 
 };

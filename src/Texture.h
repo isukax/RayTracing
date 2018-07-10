@@ -94,3 +94,5 @@ private:
 	int height;
 	unsigned char* texels;
 };
+
+using ImageTexturePtr = std::shared_ptr<ImageTexture>;

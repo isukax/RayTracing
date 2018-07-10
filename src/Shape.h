@@ -287,3 +287,67 @@ private:
 	ShapeList list;
 	MaterialPtr material;
 };
+
+class Translate : public Hitable 
+{
+public:
+	Translate(HitablePtr obj, Vector3 offset)
+		: object(obj)
+		, offset(offset)
+	{}
+
+	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
+	{
+		Ray rayOffset(ray.origin - offset, ray.direction);
+		if (object->intersect(rayOffset, hitpoint))
+		{
+			hitpoint.position += offset;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	virtual const MaterialPtr GetMaterial() const override
+	{
+		return object->GetMaterial();
+	}
+
+private:
+	HitablePtr object;
+	Vector3 offset;
+
+};
+
+class Rotate : public Hitable
+{
+public:
+	Rotate() = delete;
+	Rotate(const HitablePtr obj, const Vector3& rot)
+		: object(obj)
+		, rot(rot)
+	{
+	}
+
+	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
+	{
+
+
+		return true;
+	}
+
+	virtual const MaterialPtr GetMaterial() const override
+	{
+		return object->GetMaterial();
+	}
+
+private:
+
+	
+
+private:
+	HitablePtr object;
+	Vector3 rot;
+};

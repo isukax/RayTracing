@@ -103,8 +103,17 @@ private:
 		HitPoint hitpoint;
 		if (!scene->Intersect(ray, hitpoint))
 		{
-			return Color();
-			// TODO IBL
+			auto& iblTexture = scene->GetIblTexture();
+			if (iblTexture == nullptr) return Color();
+			double phi = atan2(ray.direction.z, ray.direction.x);
+			//double phi = atan2(ray.direction.x, ray.direction.z);
+			double theta = asin(ray.direction.y);
+			double u = 1.0 - (phi + kPI) / kPI2;
+			double v = (theta + kPI / 2.0) / kPI;
+			return iblTexture->value(u, v, hitpoint.normal);
+			//float t = 0.5 * (-ray.direction.y + 1.0);
+			//return Color(1.0, 1.0, 1.0) * (1.0 - t) + Color(0.5, 0.7, 1.0) * t;
+			//return Color();
 		}
 		const Vector3 normal = Dot(hitpoint.normal, ray.direction) < 0.0 ? hitpoint.normal : (-hitpoint.normal); // 交差位置の法線（物体からのレイの入出を考慮）
 		HitablePtr hitObject = hitpoint.object;

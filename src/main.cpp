@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 {
 	std::chrono::system_clock::time_point start, end;
 
-	Renderer renderer(320, 240, 8, 4);
+	Renderer renderer(320, 240, 8, 1);
 	//Renderer renderer(1024, 1024, 16, 16);
 
 	//const double cocSize = 0.03328 * 1e-3;	//mm

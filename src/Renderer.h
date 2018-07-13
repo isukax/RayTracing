@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstdint>
 #include "Scene.h"
-#include "Ppm.h"
+#include "File.h"
 
 //class RenderTarget
 //{
@@ -93,7 +93,7 @@ public:
 			}
 		}
 
-		Ppm::Save(std::string("image/result.ppm"), image, width, height);
+		File::Save(std::string("image/result"), image, width, height);
 		delete[] image;
 	}
 

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "Shape.h"
+#include "Model.h"
 
 class ShapeBuilder
 {
@@ -33,6 +34,12 @@ public:
 	ShapeBuilder& translate(const Vector3& offset)
 	{
 		object = std::make_shared<Translate>(object, offset);
+		return *this;
+	}
+
+	ShapeBuilder& model(std::string path, const MaterialPtr material)
+	{
+		object = std::make_shared<Model>(path, material);
 		return *this;
 	}
 

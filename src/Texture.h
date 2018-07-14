@@ -1,5 +1,5 @@
 ﻿#pragma once
-#define STB_IMAGE_IMPLEMENTATION
+
 
 #include <cstdint>
 #include <memory>
@@ -7,6 +7,9 @@
 #include "Constant.h"
 #include "Vector3.h"
 #include "Ray.h"
+
+#define _CRT_SECURE_NO_WARNINGS
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 class Texture;

@@ -5,9 +5,9 @@
 #include "Constant.h"
 #include "HitPoint.h"
 #include "Material.h"
-#include <ImathVec.h>
-#include <ImathVecAlgo.h>
-#include <ImathMatrix.h>
+//#include <ImathVec.h>
+//#include <ImathVecAlgo.h>
+//#include <ImathMatrix.h>
 
 class Hitalble;
 using HitablePtr = std::shared_ptr<Hitable>;
@@ -301,6 +301,9 @@ public:
 		, p2(p2)
 		, material(material)
 	{
+		const Vector3 edge1 = p1 - p0;
+		const Vector3 edge2 = p2 - p0;
+		normal = Normalize(Cross(edge1, edge2));
 	}
 
 	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
@@ -309,6 +312,31 @@ public:
 		const Vector3 edge2 = p2 - p0;
 		const Vector3 op = ray.origin - p0;
 
+#if 0
+		// 平面方程式
+		// 面上の座標計算
+		if (Dot(ray.direction, normal) >= 0.0001) return false;
+
+		double t = Dot(p0 - ray.origin, normal) / Dot(ray.direction, normal);
+		if (t < kEPS) return false;
+
+		Vector3 pos = ray.origin + t * ray.direction;
+
+		// 三角形内判定
+		Vector3 pt = pos - p0;
+		Vector3 c = Cross(edge1, pt);
+		if (Dot(c, normal) < 0) return false;
+		c = Cross(p2 - p1, pt);
+		if (Dot(c, normal) < 0) return false;
+		c = Cross(p0 - p2, pt);
+		if (Dot(c, normal) < 0) return false;
+
+		hitpoint.distance = t;
+		hitpoint.position = ray.origin + ray.direction * hitpoint.distance;
+		hitpoint.normal = Normalize(Cross(edge1, edge2));
+		hitpoint.u = 0;
+		hitpoint.v = 0;
+#else
 		double det = determinant(edge1, edge2, -ray.direction);
 		if (det <= 0) return false;
 
@@ -319,13 +347,14 @@ public:
 		if (v < 0 ||  (u + v) > 1) return false;
 
 		double t = determinant(edge1, edge2, op) / det;
+		if (t < kEPS) return false;
 
 		hitpoint.distance = t;
 		hitpoint.position = ray.origin + ray.direction * hitpoint.distance;
-		hitpoint.normal = Normalize(Cross(edge1, edge2));
+		hitpoint.normal = normal;
 		hitpoint.u = u;
 		hitpoint.v = v;
-
+#endif
 		return true;
 	}
 
@@ -344,6 +373,7 @@ private:
 	Vector3 p0;
 	Vector3 p1;
 	Vector3 p2;
+	Vector3 normal;
 	MaterialPtr material;
 };
 
@@ -393,7 +423,6 @@ public:
 
 	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
 	{
-
 
 		return true;
 	}

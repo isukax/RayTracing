@@ -3,7 +3,7 @@
 #include <direct.h>
 #include "Renderer.h"
 #include "ShapeBuilder.h"
-//#include "Model.h"
+#include "Model.h"
 
 ScenePtr Scene1()
 {
@@ -106,7 +106,7 @@ ScenePtr Scene3()
 
 int main(int argc, char** argv)
 {
-	//bool flag = Model::Load("duck.fbx");
+	bool flag = Model::Load(std::string(RESOURCE_DIR) + "duck.fbx");
 
 	std::chrono::system_clock::time_point start, end;
 

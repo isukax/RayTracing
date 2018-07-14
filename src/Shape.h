@@ -5,6 +5,9 @@
 #include "Constant.h"
 #include "HitPoint.h"
 #include "Material.h"
+#include <ImathVec.h>
+#include <ImathVecAlgo.h>
+#include <ImathMatrix.h>
 
 class Hitalble;
 using HitablePtr = std::shared_ptr<Hitable>;
@@ -287,6 +290,63 @@ private:
 	ShapeList list;
 	MaterialPtr material;
 };
+
+class Triangle : public Hitable
+{
+public:
+	Triangle() = delete;
+	Triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2, const MaterialPtr& material)
+		: p0(p0)
+		, p1(p1)
+		, p2(p2)
+		, material(material)
+	{
+	}
+
+	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
+	{
+		const Vector3 edge1 = p1 - p0;
+		const Vector3 edge2 = p2 - p0;
+		const Vector3 op = ray.origin - p0;
+
+		double det = determinant(edge1, edge2, -ray.direction);
+		if (det <= 0) return false;
+
+		double u = determinant(op, edge2, -ray.direction) / det;
+		if (u < 0 || u > 1) return false;
+
+		double v = determinant(edge1, op, -ray.direction) / det;
+		if (v < 0 ||  (u + v) > 1) return false;
+
+		double t = determinant(edge1, edge2, op) / det;
+
+		hitpoint.distance = t;
+		hitpoint.position = ray.origin + ray.direction * hitpoint.distance;
+		hitpoint.normal = Normalize(Cross(edge1, edge2));
+		hitpoint.u = u;
+		hitpoint.v = v;
+
+		return true;
+	}
+
+	virtual const MaterialPtr GetMaterial() const override
+	{
+		return material;
+	}
+
+private:
+
+	double determinant(const Vector3& a, const Vector3& b, const Vector3& c) const
+	{
+		return (a.x * b.y * c.z) + (a.y * b.z * c.x) + (a.z * b.x * c.y) - (a.x * b.z * c.y) - (a.y * b.x * c.z) - (a.z * b.y * c.x);
+	}
+
+	Vector3 p0;
+	Vector3 p1;
+	Vector3 p2;
+	MaterialPtr material;
+};
+
 
 class Translate : public Hitable 
 {

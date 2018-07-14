@@ -21,10 +21,11 @@
 class Model
 {
 public:
-	//struct Vertex {
-	//	FLOAT X, Y, Z;
-	//	XMFLOAT2 texcoord;
-	//};
+	struct Vertex {
+		Imath::V3d position;
+		Imath::V2d texcoord;
+	};
+
 	// 三角形.
 	struct Triangle {
 		Imath::V3d p0;
@@ -32,7 +33,11 @@ public:
 		Imath::V3d p2;
 	};
 
-
+	struct Texture {
+		std::string type;
+		std::string path;
+		//ID3D11ShaderResourceView *texture;
+	};
 
 
 public:
@@ -60,9 +65,9 @@ public:
 	//	triangle.p2 = Imath::V3d(200, 200, -10);
 
 	//	// Data to fill
-	//	vector<Vertex> vertices;
-	//	vector<UINT> indices;
-	//	vector<Texture> textures;
+	//	std::vector<Vertex> vertices;
+	//	std::vector<uint32_t> indices;
+	//	std::vector<Texture> textures;
 
 	//	if (mesh->mMaterialIndex >= 0)
 	//	{

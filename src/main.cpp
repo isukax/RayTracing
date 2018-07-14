@@ -15,15 +15,18 @@ ScenePtr Scene1()
 	CameraPtr camera = std::make_shared<Camera>(camPos, camDir, focalLength, focalPlane);
 	ScenePtr scene = std::make_shared<Scene>(camera);
 
-	scene->SetIblTexture("Tokyo_BigSight_3k.hdr");
+	scene->SetIblTexture("ibl/Tokyo_BigSight_3k.hdr");
 
 	ShapeBuilder builder;
 	std::vector<HitablePtr> list
 	{
-		std::make_shared<Rect>(-base * 2, base * 4, 0, base * 2, -60,		Rect::AxisType::XZ,	std::make_shared<LambertMaterial>(std::make_shared<ColorTexture>(Color(.75, .75, .75)))),				// 天井
-		std::make_shared<Sphere>(Vector3(base / 2 - 650, base / 2, base / 2),			300,	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0.99)), // 鏡
-		std::make_shared<Sphere>(Vector3(base / 2 + 650, base/2, base / 2),			300,	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0.5)), // 鏡
-		std::make_shared<Sphere>(Vector3(base/2, base/2, base/2),			300,	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0)), // 鏡
+		//std::make_shared<Rect>(-base * 2, base * 4, 0, base * 2, -60,		Rect::AxisType::XZ,	std::make_shared<LambertMaterial>(std::make_shared<ColorTexture>(Color(.75, .75, .75)))),				// 天井
+		//std::make_shared<Sphere>(Vector3(base / 2 - 650, base / 2, base / 2),			300,	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0.99)), // 鏡
+		//std::make_shared<Sphere>(Vector3(base / 2 + 650, base/2, base / 2),			300,	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0.5)), // 鏡
+		//std::make_shared<Sphere>(Vector3(base / 2, base / 2, base / 2),			300,	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0)), // 鏡
+		std::make_shared<Rect>(0, base, 0, base, base,	Rect::AxisType::XY,	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0)),				// 奥
+		//std::make_shared<Triangle>(Vector3(0, 0, base - 1), Vector3(base, base, base - 1), Vector3(base, 0, base - 1),	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0)), // 鏡
+		//std::make_shared<Triangle>(Vector3(0, base, base-1), Vector3(base, base, base-1), Vector3(0, 0, base-1),	std::make_shared<MetalMaterial>(std::make_shared<ColorTexture>(Color(0.99, 0.99, 0.99)), Color(), 0)), // 鏡
 	};
 	scene->Add(list);
 
@@ -106,7 +109,8 @@ ScenePtr Scene3()
 
 int main(int argc, char** argv)
 {
-	bool flag = Model::Load(std::string(RESOURCE_DIR) + "duck.fbx");
+	bool flag = Model::Load(std::string(MODEL_DIR) + "bunny.obj");
+	//bool flag = Model::Load(std::string(MODEL_DIR) + "duck.fbx");
 
 	std::chrono::system_clock::time_point start, end;
 
@@ -122,7 +126,7 @@ int main(int argc, char** argv)
 	//const Vector3 targetPos(0, 0, 0);
 	//const auto camDir = Normalize(targetPos - camPos);
 
-	ScenePtr scene = Scene2();
+	ScenePtr scene = Scene1();
 	auto camera = scene->GetCamera();
 	renderer.SetScene(scene);
 

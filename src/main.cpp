@@ -3,6 +3,7 @@
 #include <direct.h>
 #include "Renderer.h"
 #include "ShapeBuilder.h"
+//#include "Model.h"
 
 ScenePtr Scene1()
 {
@@ -70,7 +71,7 @@ ScenePtr Scene3()
 	CameraPtr camera = std::make_shared<Camera>(camPos, camDir, focalLength, focalPlane);
 	ScenePtr scene = std::make_shared<Scene>(camera);
 
-	scene->SetIblTexture("Tokyo_BigSight_3k.hdr");
+	scene->SetIblTexture("ibl/Tokyo_BigSight_3k.hdr");
 	//scene->SetIblTexture("Tropical_Beach_3k.hdr");
 	//scene->SetIblTexture("Playa_Sunrise_8k.jpg");
 
@@ -105,6 +106,8 @@ ScenePtr Scene3()
 
 int main(int argc, char** argv)
 {
+	//bool flag = Model::Load("duck.fbx");
+
 	std::chrono::system_clock::time_point start, end;
 
 	Renderer renderer(320, 240, 8, 1);
@@ -119,7 +122,7 @@ int main(int argc, char** argv)
 	//const Vector3 targetPos(0, 0, 0);
 	//const auto camDir = Normalize(targetPos - camPos);
 
-	ScenePtr scene = Scene3();
+	ScenePtr scene = Scene2();
 	auto camera = scene->GetCamera();
 	renderer.SetScene(scene);
 

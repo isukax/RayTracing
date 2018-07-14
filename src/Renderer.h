@@ -93,7 +93,7 @@ public:
 			}
 		}
 
-		File::Save(std::string("image/result"), image, width, height);
+		File::Save(std::string("result"), image, width, height);
 		delete[] image;
 	}
 

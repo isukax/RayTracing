@@ -9,3 +9,5 @@ constexpr uint32_t kDepthLimit = 64;
 
 using Color = Vector3;
 
+#define RESOURCE_DIR "../resource/"
+#define OUTPUT_DIR "../output/"

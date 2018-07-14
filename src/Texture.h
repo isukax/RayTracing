@@ -62,7 +62,15 @@ public:
 	ImageTexture(std::string fileName)
 	{
 		int n;
-		texels = stbi_load(fileName.c_str(), &width, &height, &n, 0);
+		std::string path = RESOURCE_DIR + fileName;
+		texels = stbi_load((path).c_str(), &width, &height, &n, 0);
+		if (texels == nullptr)
+		{
+			std::cerr << "NOT FOUND TEXTURE : " << path.c_str() << std::endl;
+			texels = new unsigned char[3] { 255, 255, 255 };
+			width = 1;
+			height = 1;
+		}
 	}
 
 	~ImageTexture()

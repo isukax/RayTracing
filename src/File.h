@@ -19,15 +19,16 @@ public:
 
 	static void Save(const std::string &filename, const Color *image, const int width, const int height, const Extension extension = Extension::PNG)
 	{
-		CreateDirectory("./image");
+		CreateDirectory(OUTPUT_DIR);
 
+		std::string path = OUTPUT_DIR + filename;
 		switch (extension)
 		{
 		case Extension::PNG:
-			SavePNG(filename, image, width, height);
+			SavePNG(path, image, width, height);
 			break;
 		case Extension::PPM:
-			SavePPM(filename, image, width, height);
+			SavePPM(path, image, width, height);
 			break;
 		}
 	}

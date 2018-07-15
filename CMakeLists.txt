@@ -16,6 +16,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 file(GLOB_RECURSE src src/*.cpp src/*.h)
 #file(GLOB_RECURSE external external/*.h)
+
 include_directories(external)
 include_directories(external/assimp/include)
 

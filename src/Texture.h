@@ -65,7 +65,7 @@ public:
 	ImageTexture(std::string fileName)
 	{
 		int n;
-		std::string path = RESOURCE_DIR + fileName;
+		std::string path = fileName;
 		texels = stbi_load((path).c_str(), &width, &height, &n, 0);
 		if (texels == nullptr)
 		{

@@ -31,15 +31,27 @@ public:
 		return *this;
 	}
 
+	ShapeBuilder& model(std::string path, const MaterialPtr material)
+	{
+		object = std::make_shared<Model>(path, material);
+		return *this;
+	}
+
 	ShapeBuilder& translate(const Vector3& offset)
 	{
 		object = std::make_shared<Translate>(object, offset);
 		return *this;
 	}
 
-	ShapeBuilder& model(std::string path, const MaterialPtr material)
+	ShapeBuilder& rotate(const Vector3& axis, const double radian)
 	{
-		object = std::make_shared<Model>(path, material);
+		object = std::make_shared<Rotate>(object, axis, radian);
+		return *this;
+	}
+
+	ShapeBuilder& scale(const Vector3& scale)
+	{
+		object = std::make_shared<Scale>(object, scale);
 		return *this;
 	}
 

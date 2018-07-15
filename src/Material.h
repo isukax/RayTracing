@@ -36,16 +36,24 @@ using MaterialPtr = std::shared_ptr<Material>;
 class Material
 {
 public:
-	enum class ReflectionType {
+	enum class ReflectionType 
+	{
 		REFLECTION_TYPE_DIFFUSE,	// 完全拡散面。いわゆるLambertian面。
 		REFLECTION_TYPE_SPECULAR,	// 理想的な鏡面。
 		REFLECTION_TYPE_REFRACTION,	// 理想的なガラス的物質。
 	};
+	enum class FaceShading
+	{
+		PHONG,
+		GOURAUD,
+		FLAT,
+	};
 
-	Material(ReflectionType type, TexturePtr albedo, Color emission = Color())
+	Material(ReflectionType type, TexturePtr albedo, Color emission = Color(), FaceShading faceShading = FaceShading::PHONG)
 		: reflType(type)
 		, albedo(albedo)
 		, emission(emission)
+		, faceShading(faceShading)
 	{
 	}
 	virtual Color GetRadiance(const Ray& ray, const HitPoint& hitpoint, Random& rand, uint32_t depth, double russianRouletteProb, std::function<Color(Vector3 dir, Color weight)> func) = 0;
@@ -65,6 +73,7 @@ public:
 	TexturePtr albedo;
 	ReflectionType reflType;
 	Color emission;
+	FaceShading faceShading;
 };
 
 class LambertMaterial : public Material

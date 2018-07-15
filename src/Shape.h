@@ -5,9 +5,12 @@
 #include "Constant.h"
 #include "HitPoint.h"
 #include "Material.h"
-//#include <ImathVec.h>
-//#include <ImathVecAlgo.h>
-//#include <ImathMatrix.h>
+#include "Util.h"
+#include <ilmbase-2.2.1/include/ImathVec.h>
+#include <ilmbase-2.2.1/include/ImathQuat.h>
+#include <ilmbase-2.2.1/include/ImathVecAlgo.h>
+#include <ilmbase-2.2.1/include/ImathMatrix.h>
+#include<sce_vectormath\include\vectormath\scalar\cpp\vectormath_aos.h>
 
 class Hitalble;
 using HitablePtr = std::shared_ptr<Hitable>;
@@ -125,6 +128,7 @@ public:
 		hitpoint.normal = Normalize(hitpoint.position - position);
 		double phi = atan2(hitpoint.normal.x, hitpoint.normal.z);
 		double theta = asin(hitpoint.normal.y);
+		//double theta = asin(hitpoint.normal.y);
 		hitpoint.u = 1.0 - (phi + kPI) / kPI2;
 		hitpoint.v = (theta + kPI / 2.0) / kPI;
 		
@@ -299,23 +303,41 @@ public:
 		: p0(p0)
 		, p1(p1)
 		, p2(p2)
+		, uv0()
+		, uv1()
+		, uv2()
 		, material(material)
 	{
-		const Vector3 edge1 = p1 - p0;
-		const Vector3 edge2 = p2 - p0;
-		normal = Normalize(Cross(edge1, edge2));
+		edge1 = p1 - p0;
+		edge2 = p2 - p0;
+		faceNormal = Normalize(Cross(edge1, edge2));
+	}
+
+	Triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Imath::V2d& uv0, const Imath::V2d& uv1, const Imath::V2d& uv2, const Vector3& normal0, const Vector3& normal1, const Vector3& normal2, const MaterialPtr& material)
+		: p0(p0)
+		, p1(p1)
+		, p2(p2)
+		, uv0(uv0)
+		, uv1(uv1)
+		, uv2(uv2)
+		, normal0(normal0)
+		, normal1(normal1)
+		, normal2(normal2)
+		, material(material)
+	{
+		edge1 = p1 - p0;
+		edge2 = p2 - p0;
+		faceNormal = Normalize(Cross(edge1, edge2));
 	}
 
 	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
 	{
-		const Vector3 edge1 = p1 - p0;
-		const Vector3 edge2 = p2 - p0;
 		const Vector3 op = ray.origin - p0;
 
 #if 0
 		// 平面方程式
 		// 面上の座標計算
-		if (Dot(ray.direction, normal) >= 0.0001) return false;
+		//if (Dot(ray.direction, normal) >= 0.0001) return false;
 
 		double t = Dot(p0 - ray.origin, normal) / Dot(ray.direction, normal);
 		if (t < kEPS) return false;
@@ -334,8 +356,8 @@ public:
 		hitpoint.distance = t;
 		hitpoint.position = ray.origin + ray.direction * hitpoint.distance;
 		hitpoint.normal = Normalize(Cross(edge1, edge2));
-		hitpoint.u = 0;
-		hitpoint.v = 0;
+		hitpoint.u = 0.5;
+		hitpoint.v = 0.5;
 #else
 		double det = determinant(edge1, edge2, -ray.direction);
 		if (det <= 0) return false;
@@ -351,9 +373,24 @@ public:
 
 		hitpoint.distance = t;
 		hitpoint.position = ray.origin + ray.direction * hitpoint.distance;
-		hitpoint.normal = normal;
-		hitpoint.u = u;
-		hitpoint.v = v;
+
+		if (material->faceShading == Material::FaceShading::PHONG)
+		{
+			Vector3 normalTemp = (normal1 - normal0) * u + (normal2 - normal0) * v + normal0;
+			hitpoint.normal = normalTemp;
+		}
+		else if (material->faceShading == Material::FaceShading::GOURAUD)
+		{
+			hitpoint.normal = Normalize(normal0 + normal1 + normal2);
+		}
+		else 
+		{
+			hitpoint.normal = faceNormal;
+		}
+
+		Imath::V2d uvTemp = (uv1 - uv0) * u + (uv2 - uv0) * v + uv0;
+		hitpoint.u = uvTemp.x;
+		hitpoint.v = 1-uvTemp.y;
 #endif
 		return true;
 	}
@@ -364,17 +401,20 @@ public:
 	}
 
 private:
-
-	double determinant(const Vector3& a, const Vector3& b, const Vector3& c) const
-	{
-		return (a.x * b.y * c.z) + (a.y * b.z * c.x) + (a.z * b.x * c.y) - (a.x * b.z * c.y) - (a.y * b.x * c.z) - (a.z * b.y * c.x);
-	}
-
 	Vector3 p0;
 	Vector3 p1;
 	Vector3 p2;
-	Vector3 normal;
+	Vector3 faceNormal;
+	Vector3 normal0;
+	Vector3 normal1;
+	Vector3 normal2;
+	Imath::V2d uv0;
+	Imath::V2d uv1;
+	Imath::V2d uv2;
 	MaterialPtr material;
+
+	Vector3 edge1;
+	Vector3 edge2;
 };
 
 
@@ -411,19 +451,77 @@ private:
 
 };
 
+// TODO Quaternion、Matrix 自作 ISPC
 class Rotate : public Hitable
 {
 public:
 	Rotate() = delete;
-	Rotate(const HitablePtr obj, const Vector3& rot)
+	Rotate(const HitablePtr obj, const Vector3& axis, const double radian)
 		: object(obj)
-		, rot(rot)
+		//, quat(Vectormath::Aos::Quat::rotation(radian, Vectormath::Aos::Vector3(axis.x, axis.y, axis.z)))
 	{
+		quat.setAxisAngle(Imath::V3d(axis.x, axis.y, axis.z), radian);
 	}
+
+	//inline const Imath::V3d rotate(const Imath::Quatd & quat, const Imath::V3d& vec)
+	//{
+	//	float tmpX, tmpY, tmpZ, tmpW;
+	//	tmpX = (((vec.x) + (quat.v.y * vec.z)) - (quat.v.z * vec.y));
+	//	tmpY = (((vec.y) + (quat.v.z * vec.x)) - (quat.v.x * vec.z));
+	//	tmpZ = (((vec.z) + (quat.v.x * vec.y)) - (quat.v.y * vec.x));
+	//	tmpW = (((quat.v.x * vec.x) + (quat.v.y * vec.y)) + (quat.v.z * vec.z));
+	//	return Imath::V3d(
+	//		((((tmpW * quat.v.x) + (tmpX * quat.r)) - (tmpY * quat.v.z)) + (tmpZ * quat.v.y)),
+	//		((((tmpW * quat.v.y) + (tmpY * quat.r)) - (tmpZ * quat.v.x)) + (tmpX * quat.v.z)),
+	//		((((tmpW * quat.v.z) + (tmpZ * quat.r)) - (tmpX * quat.v.y)) + (tmpY * quat.v.x))
+	//		);
+	//}
 
 	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
 	{
+#if 0
+		using vec3 = Vectormath::Aos::Vector3;
+		Vectormath::Aos::Quat revq = Vectormath::Aos::conj(quat);
+		vec3 origin = Vectormath::Aos::rotate(revq, vec3(ray.origin.x, ray.origin.y, ray.origin.z));
+		vec3 direction = Vectormath::Aos::rotate(revq, vec3(ray.direction.x, ray.direction.y, ray.direction.z));
+		Vector3 o = Vector3(origin.getX(), origin.getY(), origin.getZ());
+		Vector3 d = Vector3(direction.getX(), direction.getY(), direction.getZ());
 
+		Ray rot_r(o, d);
+		if (object->intersect(rot_r, hitpoint)) {
+			vec3 pos = vec3(hitpoint.position.x, hitpoint.position.y, hitpoint.position.z);
+			vec3 normal = vec3(hitpoint.normal.x, hitpoint.normal.y, hitpoint.normal.z);
+			vec3 rpos = Vectormath::Aos::rotate(quat, pos);
+			vec3 rnormal = Vectormath::Aos::rotate(quat, normal);
+			hitpoint.position = Vector3(rpos.getX(), rpos.getY(), rpos.getZ());
+			hitpoint.normal =Vector3(rnormal.getX(), rnormal.getY(), rnormal.getZ());
+			return true;
+		}
+		else {
+			return false;
+		}
+#else
+		Imath::Quatd invQ = quat.inverse();
+		Imath::V3d origin = invQ.rotateVector(Imath::V3d(ray.origin.x, ray.origin.y, ray.origin.z));
+		Imath::V3d direction = invQ.rotateVector(Imath::V3d(ray.direction.x, ray.direction.y, ray.direction.z));
+		//Imath::V3d origin = rotate(invQ, Imath::V3d(ray.origin.x, ray.origin.y, ray.origin.z));
+		//Imath::V3d direction = rotate(invQ, Imath::V3d(ray.direction.x, ray.direction.y, ray.direction.z));
+		
+		Ray rotRay(Vector3(origin.x, origin.y, origin.z), Vector3(direction.x, direction.y, direction.z));
+		if (object->intersect(rotRay, hitpoint))
+		{
+			Imath::V3d hPos = quat.rotateVector(Imath::V3d(hitpoint.position.x, hitpoint.position.y, hitpoint.position.z));
+			Imath::V3d hNormal = quat.rotateVector(Imath::V3d(hitpoint.normal.x, hitpoint.normal.y, hitpoint.normal.z));
+			//Imath::V3d hPos = rotate(quat, Imath::V3d(hitpoint.position.x, hitpoint.position.y, hitpoint.position.z));
+			//Imath::V3d hNormal = rotate(quat, Imath::V3d(hitpoint.normal.x, hitpoint.normal.y, hitpoint.normal.z));
+			hitpoint.position = Vector3(hPos.x, hPos.y, hPos.z);
+			hitpoint.normal = Vector3(hNormal.x, hNormal.y, hNormal.z);
+			return true;
+		}
+		else {
+			return false;
+		}
+#endif
 		return true;
 	}
 
@@ -432,11 +530,44 @@ public:
 		return object->GetMaterial();
 	}
 
-private:
-
 	
 
 private:
 	HitablePtr object;
-	Vector3 rot;
+	//Vectormath::Aos::Quat quat;
+	Imath::Quatd quat;
+};
+
+
+class Scale : public Hitable
+{
+public:
+	Scale(HitablePtr obj, Vector3 scale)
+		: object(obj)
+		, scale(scale)
+	{}
+
+	virtual bool intersect(const Ray& ray, HitPoint& hitpoint) override
+	{
+		Ray rayOffset(ray.origin / scale, ray.direction);
+		if (object->intersect(rayOffset, hitpoint))
+		{
+			hitpoint.position = hitpoint.position * scale;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	virtual const MaterialPtr GetMaterial() const override
+	{
+		return object->GetMaterial();
+	}
+
+private:
+	HitablePtr object;
+	Vector3 scale;
+
 };
